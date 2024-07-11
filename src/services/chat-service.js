@@ -6,8 +6,10 @@ export async function getPromptResponse({ query, onSuccess, onError }) {
     const response = await axios.get(
       CHAT_CONSTANTS.GET_PROMPT_RESPONSE + "?" + query
     );
+    console.log("API response:", response);
     onSuccess(response?.data?.response);
   } catch (error) {
+    console.log("Error occured in getPromptResponse: ", error);
     onError(error);
   }
 }

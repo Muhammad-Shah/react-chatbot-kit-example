@@ -1,10 +1,11 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from api.inget import process_query
 
 app = FastAPI()
 
 # Allow CORS for the React frontend
-origins = ["http://localhost:3000"]  # Update with your frontend URL
+origins = ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:5173"]  # Update with your frontend URL
 
 app.add_middleware(
     CORSMiddleware,
@@ -17,6 +18,8 @@ app.add_middleware(
 
 @app.get("/api/prompts")
 async def get_prompt_response(msg: str = Query(...)):
+    print(msg)
     # Process the message and generate a response
-    response = f"Response for: {msg}"
+    response = await process_query(msg)
+    print(response)
     return {"response": response}
