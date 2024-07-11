@@ -17,6 +17,7 @@ load_dotenv('.env')
 # Access your API key
 GOOGLE_API = os.getenv("GOOGLE_API")
 
+
 def load_data():
     """
     Load data from a file using the provided file path and JSON schema.
@@ -49,7 +50,6 @@ def load_data():
 
         # Load the data using the JSONLoader instance
         data = loader.load()
-        print(data[0])
         # Create Document objects from the loaded data
         # data = [Document(page_content=doc.page_content) for doc in data]
 
@@ -108,19 +108,16 @@ def create_chroma_db(persist_directory, _embeddings):
     Returns:
         Chroma: The created Chroma database.
     """
-    print(os.getcwd())
+
     # Check if the 'vectorstore' directory exists
     if os.path.isdir(os.getcwd() + '/vectorstore'):
         # Load the database from the directory
-        print("its should run")
         db = Chroma(persist_directory=persist_directory,
                     embedding_function=_embeddings)
     else:
         # Load the data from a JSON file
-        print("loading data")
         data = load_data()
         # Create the database from the documents
-        print("its should not run")
         db = Chroma.from_documents(
             data, _embeddings, persist_directory=persist_directory)
 
@@ -288,18 +285,26 @@ async def process_query(query):
 
     system_prompt = (
         """
-    **System Prompt:**
+        
+    **Primary Goal:** Provide concise and accurate answers to frequent customer questions about the ecommerce website, mimicking human-like responses without offering extra information, solely based on the provided context.
+    if the user's question can be answered using the provided context, the chatbot should answer the user question. if some details are present in the context then the chatbot should answer only those details.
+    Response Prompt Template:
 
-    As a virtual assistant for our bustling online marketplace, your role is to provide swift and accurate responses to customer inquiries. Our customers are the lifeblood of our business, and we want to ensure they feel valued and supported. 
-    Your mission is to enhance their experience by offering immediate assistance with order status updates, guiding them through our various payment methods, and clarifying our return policies. With your help, our customer support team can focus their energies on addressing more complex issues, knowing that you've got the basics covered.
+    Provide a brief and direct answer to the user's question, only using the provided context
 
-    Remember, clarity and brevity are key. Please provide concise responses in no more than three sentences, and always remain friendly and professional. The satisfaction of our customers depends on it!
+    **Evaluation Criteria:**
 
-    **Context:**
-        - For detailed guidance use the context below. Don't go outside of the context.
-        - Look for {{"Question": "question asked", "Answer": "answer to the question"}} in the context.
-        - Remainder: if you don't know simply say You don't know with appropriate tone. 
-        \n\n
+    1. Accuracy: The chatbot's response accurately addresses the user's question, based on the provided context.
+    2. Conciseness: The chatbot's response is brief and to the point, without unnecessary additional information.
+    3. Human-like tone: The chatbot's response simulates a human customer support agent's tone and language.
+    4. Contextual Relevance: The chatbot's response only uses the provided context and does not provide extra information.
+
+    **Additional Response:**
+
+    - If the user's question is irrelevent to customers questions for ecommerce website, the chatbot should respond with: "I'm not familiar with that question."
+    - If the user's question does not match the provided context, the chatbot should respond with:
+    "I'm not familiar with that question. Pleas contact ask.maktek.ai"
+    \n\n
         {context}
         """
     )
