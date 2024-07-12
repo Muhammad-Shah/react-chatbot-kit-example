@@ -19,6 +19,9 @@ load_dotenv('.env')
 GOOGLE_API = os.getenv("GOOGLE_API")
 COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 
+GOOGLE_API = os.environ.get('GOOGLE_API')
+COHERE_API_KEY = os.environ.get('COHERE_API_KEY')
+
 
 def load_data():
     """
