@@ -3,7 +3,8 @@ import os
 from dotenv import load_dotenv
 from langchain import hub
 from langchain_core.output_parsers import StrOutputParser
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_cohere.embeddings import CohereEmbeddings
+# from langchain_huggingface import HuggingFaceEmbeddings
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.prompts import ChatPromptTemplate, PromptTemplate
 from langchain_google_genai import ChatGoogleGenerativeAI
@@ -16,6 +17,7 @@ load_dotenv('.env')
 
 # Access your API key
 GOOGLE_API = os.getenv("GOOGLE_API")
+COHERE_API_KEY = os.getenv("COHERE_API_KEY")
 
 
 def load_data():
@@ -77,7 +79,7 @@ def create_embeddings(model_name):
     """
     # Initialize Hugging Face Embeddings with the specified model name
     # This instance is cached for future use within the Streamlit session
-    embeddings = HuggingFaceEmbeddings(model_name=model_name)
+    embeddings = CohereEmbeddings(model=model_name, cohere_api_key=COHERE_API_KEY)
 
     # Return the cached instance of Hugging Face Embeddings
     return embeddings
@@ -310,7 +312,7 @@ async def process_query(query):
     )
 
     retriever = create_chroma_db(
-        "/vectorstore", create_embeddings("sentence-transformers/all-mpnet-base-v2"))
+        "/vectorstore", create_embeddings("embed-english-light-v3.0"))
     llm = create_llm(model, temperature, max_tokens, top_p, GOOGLE_API)
     prompt = create_prompt(system_prompt)
     rag_chain = create_rag_chain(retriever, prompt, llm)
